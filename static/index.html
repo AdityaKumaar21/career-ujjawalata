@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Career Ujjawalata</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0a0a0a;
+      --surface: #141414;
+      --border:  #222;
+      --accent:  #aaff00;
+      --text:    #f0f0f0;
+      --muted:   #555;
+      --danger:  #ff4545;
+      --warm:    #ffaa00;
+    }
+
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; }
+
+    /* ─── App shell ───────────────────────────────────────────────────── */
+    #app { position: relative; width: 100%; height: 100%; overflow: hidden; }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 2.5rem;
+      transform: translateX(100%);
+      transition: transform 0.5s cubic-bezier(.77,0,.18,1);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .screen.active  { transform: translateX(0); }
+    .screen.behind  { transform: translateX(-100%); }
+
+    /* ─── Screen 0: Hero ─────────────────────────────────────────────── */
+    #s0 {
+      justify-content: center;
+      background: var(--bg);
+    }
+
+    .hero-tag {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .hero-tag::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .hero-title {
+      font-size: clamp(3.5rem, 10vw, 8rem);
+      font-weight: 900;
+      line-height: 0.92;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+    .hero-title em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 420px;
+      line-height: 1.6;
+      margin-bottom: 3rem;
+    }
+
+    .hero-start {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--accent);
+      color: #000;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: none;
+      padding: 1rem 2rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .hero-start:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(170,255,0,0.3);
+    }
+
+    .hero-bg-num {
+      position: absolute;
+      right: -0.05em;
+      bottom: -0.15em;
+      font-size: clamp(12rem, 35vw, 28rem);
+      font-weight: 900;
+      color: #ffffff04;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: -0.05em;
+    }
+
+    /* ─── Section screens (1 & 2) ────────────────────────────────────── */
+    .screen-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-shrink: 0;
+    }
+
+    .step-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .step-title {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+    .step-title span { color: var(--accent); }
+
+    .topbar-nav {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .nav-btn:hover { border-color: var(--text); color: var(--text); }
+    .nav-btn.primary {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .nav-btn.primary:hover {
+      background: var(--accent);
+      color: #000;
+    }
+
+    /* ─── Content layout ─────────────────────────────────────────────── */
+    .content-layout {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 2.5rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 700px) {
+      .content-layout { grid-template-columns: 1fr; }
+      .chart-side { display: none; }
+    }
+
+    .sliders-col { display: flex; flex-direction: column; gap: 0.6rem; overflow-y: auto; padding-right: 0.5rem; }
+    .sliders-col::-webkit-scrollbar { width: 3px; }
+    .sliders-col::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .chart-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.75rem;
+      position: sticky;
+      top: 0;
+    }
+
+    .chart-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ─── Likert rows ────────────────────────────────────────────────── */
+    .srow {
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .srow:last-child { border-bottom: none; }
+
+    .srow-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      text-transform: uppercase;
+    }
+
+    .likert {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+
+    .lk-btn {
+      padding: 0.45rem 0.2rem;
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      white-space: normal;
+    }
+    .lk-btn:hover { border-color: #444; color: var(--text); }
+
+    .lk-btn[data-val="10"].active { border-color: #ff4545; color: #ff4545; background: rgba(255,69,69,0.1); }
+    .lk-btn[data-val="30"].active { border-color: #ff8c00; color: #ff8c00; background: rgba(255,140,0,0.1); }
+    .lk-btn[data-val="50"].active { border-color: #888;    color: #aaa;    background: rgba(150,150,150,0.1); }
+    .lk-btn[data-val="70"].active { border-color: #77cc00; color: #77cc00; background: rgba(119,204,0,0.1); }
+    .lk-btn[data-val="90"].active { border-color: #aaff00; color: #aaff00; background: rgba(170,255,0,0.1); }
+
+    /* ─── Bottom bar ─────────────────────────────────────────────────── */
+    .bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      margin-top: 1rem;
+    }
+
+    .dot-progress {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .dot.on { background: var(--accent); transform: scale(1.3); }
+
+    .continue-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, opacity 0.2s;
+    }
+    .continue-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(170,255,0,0.25);
+    }
+    .continue-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.15s;
+      padding: 0.5rem 0;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    /* ─── Screen 3: Results ──────────────────────────────────────────── */
+    #s3 { justify-content: flex-start; }
+
+    .results-header {
+      margin-bottom: 2.5rem;
+      flex-shrink: 0;
+    }
+
+    .results-eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .results-eyebrow::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .results-title {
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.03em;
+      line-height: 0.95;
+    }
+
+    .career-cards { display: flex; flex-direction: column; gap: 1px; }
+
+    .career-card {
+      background: var(--surface);
+      border-left: 3px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s;
+    }
+    .career-card.show { opacity: 1; transform: translateX(0); }
+    .career-card:hover { border-left-color: var(--accent); }
+
+    .card-main {
+      padding: 1.25rem 1.5rem;
+      display: grid;
+      grid-template-columns: 2.5rem 1fr auto;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .details-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.65rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .details-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── Detail drawer ──────────────────────────────────────────────── */
+    .drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(5px);
+      z-index: 150;
+      align-items: flex-end;
+    }
+    .drawer-overlay.open { display: flex; }
+
+    .drawer {
+      width: 100%;
+      max-height: 78vh;
+      background: #111;
+      border-top: 2px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      animation: drawerUp 0.35s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes drawerUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.75rem 0;
+      flex-shrink: 0;
+    }
+    .drawer-career {
+      font-size: 1.1rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .drawer-close {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 2rem; height: 2rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .drawer-close:hover { border-color: var(--text); color: var(--text); }
+
+    .drawer-tabs {
+      display: flex;
+      gap: 0;
+      padding: 1rem 1.75rem 0;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+    .drawer-tabs::-webkit-scrollbar { display: none; }
+    .dtab {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.5rem 1rem 0.75rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+    .dtab:hover { color: var(--text); }
+    .dtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.75rem;
+    }
+    .drawer-body::-webkit-scrollbar { width: 3px; }
+    .drawer-body::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .pane-title {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+    }
+
+    .item-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .item-list li {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .item-list li:last-child { border-bottom: none; }
+    .item-num {
+      font-size: 0.7rem;
+      font-weight: 800;
+      font-family: 'Courier New', monospace;
+      color: var(--muted);
+      min-width: 1.5rem;
+    }
+
+    .stat-block {
+      background: var(--surface);
+      border-left: 3px solid var(--accent);
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+    }
+    .stat-note {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+      font-style: italic;
+    }
+    .stat-warn { border-left-color: #ff8c00; }
+    .stat-warn .stat-value { color: #ff8c00; }
+
+    .card-rank {
+      font-size: 2rem;
+      font-weight: 900;
+      font-family: 'Courier New', monospace;
+      color: var(--muted);
+      line-height: 1;
+    }
+    .career-card:nth-child(1) .card-rank { color: #ffd700; }
+    .career-card:nth-child(2) .card-rank { color: #c0c0c0; }
+    .career-card:nth-child(3) .card-rank { color: #cd7f32; }
+
+    .card-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    .bar-track {
+      height: 3px;
+      background: var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .bar-fill {
+      position: absolute;
+      left: 0; top: 0; height: 100%;
+      background: var(--accent);
+      transition: width 1s cubic-bezier(.4,0,.2,1);
+    }
+
+    .card-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+    .card-pct {
+      font-size: 1.5rem;
+      font-weight: 900;
+      font-family: 'Courier New', monospace;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .contact-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .contact-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .results-footer {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .retake-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.6rem 1.25rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .retake-btn:hover { border-color: var(--text); color: var(--text); }
+
+    /* ─── Spinner ────────────────────────────────────────────────────── */
+    .spin {
+      display: inline-block;
+      width: 0.9rem; height: 0.9rem;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Expert modal ───────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      width: min(440px, 94vw);
+      position: relative;
+      overflow: hidden;
+      animation: mIn 0.25s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes mIn { from { opacity:0; transform:scale(0.96) translateY(10px); } to { opacity:1; transform:none; } }
+
+    .modal-header {
+      background: var(--accent);
+      padding: 1.75rem 1.75rem 1.25rem;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: rgba(0,0,0,0.2);
+      border: none;
+      color: #000;
+      width: 1.8rem; height: 1.8rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: rgba(0,0,0,0.35); }
+
+    .expert-avatar {
+      width: 3.5rem; height: 3.5rem;
+      background: rgba(0,0,0,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 900;
+      font-family: 'Courier New', monospace;
+      color: #000;
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    .modal-expert-name {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #000;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+    }
+    .modal-career-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: rgba(0,0,0,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-top: 0.25rem;
+    }
+
+    .modal-body { padding: 1.5rem 1.75rem; }
+
+    .expert-spec {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+
+    .contact-cards { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .contact-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      transition: border-color 0.15s;
+    }
+    .contact-card:hover { border-color: var(--accent); }
+    .contact-card-icon {
+      width: 2rem; height: 2rem;
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .contact-card-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+    .contact-card-value {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── S0: Hero ─────────────────────────────────────────────────── -->
+  <section class="screen active" id="s0">
+    <div class="hero-tag">Career Assessment · Class X &amp; XII</div>
+    <h1 class="hero-title">Career<br><em>Ujjawalata</em></h1>
+    <p class="hero-sub">20 honest questions. No fluff. Your top 3 career paths — ranked by fit.</p>
+    <button class="hero-start" onclick="goTo(1)">
+      Begin Assessment
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+    <div class="hero-bg-num">20</div>
+  </section>
+
+  <!-- ── S1: Aptitude ─────────────────────────────────────────────── -->
+  <section class="screen" id="s1">
+    <div class="screen-topbar">
+      <div>
+        <div class="step-label">Step 01 of 02</div>
+        <div class="step-title">Aptitude <span>&amp;</span> Skills</div>
+      </div>
+      <div class="topbar-nav">
+        <button class="nav-btn" onclick="goTo(0)">← Back</button>
+        <button class="nav-btn primary" onclick="goTo(2)">Interests →</button>
+      </div>
+    </div>
+
+    <div class="content-layout">
+      <div class="sliders-col" id="aptSliders">
+        <!-- filled by JS -->
+      </div>
+      <div class="chart-side">
+        <div class="chart-label">Aptitude Profile</div>
+        <canvas id="aptitudeChart" width="200" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="dot-progress">
+        <div class="dot on" id="d0"></div>
+        <div class="dot" id="d1"></div>
+      </div>
+      <button class="continue-btn" onclick="goTo(2)">
+        Next: Interests
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ── S2: Interests ────────────────────────────────────────────── -->
+  <section class="screen" id="s2">
+    <div class="screen-topbar">
+      <div>
+        <div class="step-label">Step 02 of 02</div>
+        <div class="step-title">Subject <span>Interests</span></div>
+      </div>
+      <div class="topbar-nav">
+        <button class="nav-btn" onclick="goTo(1)">← Back</button>
+      </div>
+    </div>
+
+    <div class="content-layout">
+      <div class="sliders-col" id="intSliders">
+        <!-- filled by JS -->
+      </div>
+      <div class="chart-side">
+        <div class="chart-label">Interest Profile</div>
+        <canvas id="interestChart" width="200" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="dot-progress">
+        <div class="dot" id="d0b"></div>
+        <div class="dot on" id="d1b"></div>
+      </div>
+      <button class="continue-btn" id="analyseBtn" onclick="analyse()">
+        Analyse My Profile
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ── S3: Results ──────────────────────────────────────────────── -->
+  <section class="screen" id="s3">
+    <div class="results-header">
+      <div class="results-eyebrow">Analysis Complete</div>
+      <div class="results-title">Your<br>Path.</div>
+    </div>
+    <div class="career-cards" id="careerCards"></div>
+    <div class="results-footer">
+      <button class="retake-btn" onclick="retake()">← Retake Assessment</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- ── Detail Drawer ─────────────────────────────────────────────── -->
+<div class="drawer-overlay" id="detailDrawer">
+  <div class="drawer">
+    <div class="drawer-header">
+      <div class="drawer-career" id="drawerTitle"></div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-tabs">
+      <button class="dtab active" onclick="switchTab(0,this)">Exams</button>
+      <button class="dtab" onclick="switchTab(1,this)">Colleges</button>
+      <button class="dtab" onclick="switchTab(2,this)">Salary</button>
+      <button class="dtab" onclick="switchTab(3,this)">Roles</button>
+      <button class="dtab" onclick="switchTab(4,this)">Duration</button>
+      <button class="dtab" onclick="switchTab(5,this)">Competition</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </div>
+</div>
+
+<!-- ── Expert Modal ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="expertModal">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="expert-avatar" id="mAvatar"></div>
+      <div class="modal-expert-name" id="mName"></div>
+      <div class="modal-career-tag" id="mTag"></div>
+    </div>
+    <div class="modal-body">
+      <div class="expert-spec" id="mSpec"></div>
+      <div class="contact-cards">
+        <a class="contact-card" id="mPhoneCard" href="">
+          <div class="contact-card-icon">📞</div>
+          <div>
+            <div class="contact-card-label">Phone</div>
+            <div class="contact-card-value" id="mPhone"></div>
+          </div>
+        </a>
+        <a class="contact-card" id="mEmailCard" href="">
+          <div class="contact-card-icon">✉️</div>
+          <div>
+            <div class="contact-card-label">Email</div>
+            <div class="contact-card-value" id="mEmail"></div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Career Details ──────────────────────────────────────────────── */
+const CAREER_DETAILS = {
+  'Engineering': {
+    exams:       ['JEE Main', 'JEE Advanced', 'BITSAT', 'VITEEE', 'MHT-CET'],
+    colleges:    ['IIT Bombay', 'IIT Delhi', 'IIT Madras', 'BITS Pilani', 'NIT Trichy'],
+    roi:         { entry: 'Starting: ₹6–25 LPA', senior: '₹40–100 LPA+', note: 'Top IIT grads regularly see ₹1 Cr+ packages' },
+    roles:       ['Software Engineer', 'Data Scientist', 'Mechanical Engineer', 'Civil Engineer', 'Product Manager'],
+    duration:    { path: 'B.Tech: 4 yrs  |  B.Tech + M.Tech (dual): 5 yrs  |  M.Tech after B.Tech: +2 yrs', note: 'Most join industry after B.Tech; M.Tech for research/academia' },
+    competition: { stat: 'JEE Main — ~11 lakh appear, ~2.5 lakh qualify (23%)', hard: 'JEE Advanced — ~2.5 lakh appear, ~40k qualify (top 1.5%)', note: 'NITs/IIITs via JEE Main; IITs only via JEE Advanced' },
+  },
+  'Medicine': {
+    exams:       ['NEET-UG', 'NEET-PG (postgrad)', 'FMGE (foreign grads)', 'USMLE (US pathway)'],
+    colleges:    ['AIIMS Delhi', 'JIPMER Puducherry', 'CMC Vellore', 'Maulana Azad Medical', 'AFMC Pune'],
+    roi:         { entry: 'Starting: ₹8–15 LPA', senior: '₹30–80 LPA', note: 'Senior specialists & surgeons earn ₹1 Cr+ in metro cities' },
+    roles:       ['General Practitioner', 'Surgeon', 'Specialist Doctor', 'Medical Researcher', 'Public Health Officer'],
+    duration:    { path: 'MBBS: 5.5 yrs + 1 yr compulsory internship  |  MD/MS residency: +3 yrs  |  Super-speciality DM/MCh: +3 yrs', note: 'Minimum 7–8 years before independent practice; 12+ for super-speciality' },
+    competition: { stat: 'NEET-UG — ~20 lakh appear, ~11 lakh qualify (55%)', hard: 'Govt MBBS seats: ~1.1 lakh total; AIIMS Delhi: ~100 seats from 20 lakh (0.0005%)', note: 'Private MBBS available but fees can be ₹50–80 lakh total' },
+  },
+  'Commerce CA': {
+    exams:       ['CA Foundation (ICAI)', 'CS Foundation', 'CMA Foundation', 'CUET (BBA/BCom)', 'CAT (MBA)'],
+    colleges:    ['SRCC Delhi', 'Shri Ram College Delhi', 'NMIMS Mumbai', 'Christ University', "St. Xavier's Mumbai"],
+    roi:         { entry: 'Starting: ₹7–15 LPA', senior: '₹25–60 LPA', note: 'Big4 (Deloitte/EY/PwC/KPMG) offer premium packages to qualified CAs' },
+    roles:       ['Chartered Accountant', 'Investment Banker', 'Financial Analyst', 'Company Secretary', 'CFO'],
+    duration:    { path: 'B.Com: 3 yrs  |  CA route: Foundation → Inter → Final = 4–5 yrs alongside degree  |  MBA: +2 yrs', note: 'CA articleship (3 yrs) runs parallel to studies — expect long hours' },
+    competition: { stat: 'CA Foundation pass rate: ~25–35%  |  CA Final pass rate: ~10–15%', hard: 'SRCC Delhi cut-off: 98–99% in boards', note: 'CA is one of India\'s toughest professional exams — low pass rates by design' },
+  },
+  'Arts Humanities': {
+    exams:       ['CUET', 'DU Entrance', 'JNU Entrance', 'UPSC Civil Services', 'NDA / CDS'],
+    colleges:    ['Delhi University', 'JNU Delhi', 'Ashoka University', 'Hyderabad Central University', 'Presidency University'],
+    roi:         { entry: 'Starting: ₹4–10 LPA', senior: '₹20–50 LPA', note: 'Civil services (IAS/IPS) = ₹60 LPA+ equivalent with perks & power' },
+    roles:       ['Civil Servant (IAS/IPS)', 'Journalist', 'Professor', 'Author / Researcher', 'Policy Analyst'],
+    duration:    { path: 'BA: 3 yrs  |  MA: +2 yrs  |  PhD: +3–5 yrs  |  UPSC prep: 2–4 yrs post-graduation', note: 'UPSC aspirants typically spend 3–5 years preparing after graduation' },
+    competition: { stat: 'UPSC CSE — ~10 lakh appear, ~1000 selected (0.1%)', hard: 'JNU entrance: moderate to high | Ashoka University: merit + interview', note: 'Most competitive for UPSC; college admissions relatively accessible via CUET' },
+  },
+  'Law': {
+    exams:       ['CLAT', 'AILET', 'LSAT India', 'DU LLB Entrance', 'MH CET Law'],
+    colleges:    ['NLSIU Bangalore', 'NALSAR Hyderabad', 'NUJS Kolkata', 'NLU Delhi', 'NLU Jodhpur'],
+    roi:         { entry: 'Starting: ₹5–15 LPA', senior: '₹50–200 LPA', note: 'Senior partners & Supreme Court advocates are among highest earners in India' },
+    roles:       ['Corporate Lawyer', 'Criminal Advocate', 'Judge', 'Legal Advisor', 'Public Prosecutor'],
+    duration:    { path: 'BA LLB (integrated): 5 yrs  |  LLB after graduation: 3 yrs  |  LLM: +1–2 yrs', note: '5-yr integrated preferred; career takes 3–5 yrs post-degree to stabilise' },
+    competition: { stat: 'CLAT — ~70k appear, ~3k NLU seats across all NLUs', hard: 'NLSIU Bangalore (top NLU): ~60 seats from 70k applicants (top 0.08%)', note: 'Private law colleges available but NLU degree carries significantly more weight' },
+  },
+  'Design Architecture': {
+    exams:       ['NATA', 'JEE Paper 2 (B.Arch)', 'NID Entrance', 'UCEED', 'CEED (M.Des)'],
+    colleges:    ['IIT Bombay (IDC)', 'NID Ahmedabad', 'School of Planning & Architecture', 'CEPT Ahmedabad', 'SPA Delhi'],
+    roi:         { entry: 'Starting: ₹5–12 LPA', senior: '₹25–60 LPA', note: 'UX/Product designers in tech companies command top-tier salaries' },
+    roles:       ['Architect', 'UX Designer', 'Product Designer', 'Interior Designer', 'Urban Planner'],
+    duration:    { path: 'B.Des: 4 yrs  |  B.Arch: 5 yrs  |  M.Des: +2 yrs  |  M.Arch: +2 yrs', note: 'B.Arch mandatory for practising architect; B.Des sufficient for design roles' },
+    competition: { stat: 'NATA: moderate (~40k appear, ~25k qualify)  |  UCEED: ~12k appear, ~1.5k qualify (12%)', hard: 'NID Ahmedabad: ~30k appear, ~120 seats (0.4%)', note: 'Portfolio quality often matters more than exam score for top design schools' },
+  },
+};
+
+/* ── Drawer ──────────────────────────────────────────────────────── */
+const TAB_RENDERERS = [
+  d => `<div class="pane-title">Key Exams</div><ul class="item-list">${(d.exams||[]).map((x,i)=>`<li><span class="item-num">0${i+1}</span>${x}</li>`).join('')}</ul>`,
+  d => `<div class="pane-title">Top Colleges</div><ul class="item-list">${(d.colleges||[]).map((x,i)=>`<li><span class="item-num">0${i+1}</span>${x}</li>`).join('')}</ul>`,
+  d => `<div class="pane-title">Salary &amp; ROI</div>
+        <div class="stat-block"><div class="stat-label">Entry Level</div><div class="stat-value">${d.roi?.entry||''}</div></div>
+        <div class="stat-block"><div class="stat-label">Senior / Peak</div><div class="stat-value">${d.roi?.senior||''}</div><div class="stat-note">${d.roi?.note||''}</div></div>`,
+  d => `<div class="pane-title">Career Roles</div><ul class="item-list">${(d.roles||[]).map((x,i)=>`<li><span class="item-num">0${i+1}</span>${x}</li>`).join('')}</ul>`,
+  d => `<div class="pane-title">Study Duration</div>
+        <div class="stat-block"><div class="stat-label">Typical Path</div><div class="stat-value" style="font-size:0.85rem;line-height:1.6">${d.duration?.path||''}</div><div class="stat-note">${d.duration?.note||''}</div></div>`,
+  d => `<div class="pane-title">Competition Level</div>
+        <div class="stat-block"><div class="stat-label">Overall</div><div class="stat-value" style="font-size:0.85rem">${d.competition?.stat||''}</div></div>
+        <div class="stat-block stat-warn"><div class="stat-label">Toughest Gate</div><div class="stat-value" style="font-size:0.85rem">${d.competition?.hard||''}</div><div class="stat-note">${d.competition?.note||''}</div></div>`,
+];
+
+let _drawerTab = 0;
+
+function openDrawer(career) {
+  const d = CAREER_DETAILS[career] || {};
+  document.getElementById('drawerTitle').textContent = career;
+  _drawerTab = 0;
+  document.querySelectorAll('.dtab').forEach((t,i) => t.classList.toggle('active', i===0));
+  document.getElementById('drawerBody').innerHTML = TAB_RENDERERS[0](d);
+  document.getElementById('detailDrawer')._career = career;
+  document.getElementById('detailDrawer').classList.add('open');
+}
+
+function switchTab(idx, btn) {
+  const career = document.getElementById('detailDrawer')._career;
+  const d = CAREER_DETAILS[career] || {};
+  _drawerTab = idx;
+  document.querySelectorAll('.dtab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.getElementById('drawerBody').innerHTML = TAB_RENDERERS[idx](d);
+}
+
+function closeDrawer() { document.getElementById('detailDrawer').classList.remove('open'); }
+document.getElementById('detailDrawer').addEventListener('click', e => { if(e.target.id==='detailDrawer') closeDrawer(); });
+
+/* ── Data ────────────────────────────────────────────────────────── */
+const APT_FIELDS = [
+  { name: 'logical_reasoning',   label: 'Logical Reasoning'   },
+  { name: 'numerical_ability',   label: 'Numerical Ability'   },
+  { name: 'verbal_ability',      label: 'Verbal Ability'      },
+  { name: 'creativity',          label: 'Creativity'          },
+  { name: 'analytical_thinking', label: 'Analytical Thinking' },
+  { name: 'leadership',          label: 'Leadership'          },
+  { name: 'spatial_ability',     label: 'Spatial Ability'     },
+  { name: 'memory_retention',    label: 'Memory Retention'    },
+  { name: 'empathy',             label: 'Empathy'             },
+];
+
+const INT_FIELDS = [
+  { name: 'interest_physics',    label: 'Physics'       },
+  { name: 'interest_chemistry',  label: 'Chemistry'     },
+  { name: 'interest_biology',    label: 'Biology'       },
+  { name: 'interest_maths',      label: 'Mathematics'   },
+  { name: 'interest_literature', label: 'Literature'    },
+  { name: 'interest_economics',  label: 'Economics'     },
+  { name: 'interest_arts',       label: 'Arts'          },
+  { name: 'interest_computers',  label: 'Computers/Tech'},
+  { name: 'interest_history',    label: 'History'       },
+  { name: 'interest_psychology', label: 'Psychology'    },
+  { name: 'interest_business',   label: 'Business'      },
+];
+
+const EXPERTS = {
+  'Engineering':         { name: 'Dr. Rajesh Kumar',  spec: 'IIT Alumnus · 15 yrs Engineering Admissions Counselling', phone: '+91 XXXXX 43210', email: 'rajesh.kumar@careerguidance.in' },
+  'Medicine':            { name: 'Dr. Priya Sharma',  spec: 'MBBS, MD · NEET Mentor & Medical Career Advisor',         phone: '+91 XXXXX 32109', email: 'priya.sharma@careerguidance.in' },
+  'Commerce CA':         { name: 'CA Amit Verma',     spec: 'Chartered Accountant · Commerce & CA Stream Counsellor',  phone: '+91 XXXXX 21098', email: 'amit.verma@careerguidance.in' },
+  'Arts Humanities':     { name: 'Prof. Meena Iyer',  spec: 'MA Literature · Humanities & Liberal Arts Career Guide',  phone: '+91 XXXXX 10987', email: 'meena.iyer@careerguidance.in' },
+  'Law':                 { name: 'Adv. Suresh Nair',  spec: 'LLB, LLM · CLAT Mentor & Legal Career Counsellor',       phone: '+91 XXXXX 09876', email: 'suresh.nair@careerguidance.in' },
+  'Design Architecture': { name: 'Ar. Kavya Menon',   spec: 'B.Arch · NID/NATA Coach & Design Career Advisor',        phone: '+91 XXXXX 98765', email: 'kavya.menon@careerguidance.in' },
+};
+
+/* ── Build Likert rows ───────────────────────────────────────────── */
+const LK_OPTIONS = [
+  { val: 10, label: 'Strongly\nDisagree' },
+  { val: 30, label: 'Disagree'           },
+  { val: 50, label: 'Neutral'            },
+  { val: 70, label: 'Agree'              },
+  { val: 90, label: 'Strongly\nAgree'    },
+];
+
+function buildLikert(fields, containerId) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = fields.map(f => `
+    <div class="srow">
+      <div class="srow-label">${f.label}</div>
+      <div class="likert" data-name="${f.name}">
+        ${LK_OPTIONS.map(o => `
+          <button class="lk-btn${o.val === 50 ? ' active' : ''}"
+                  data-val="${o.val}"
+                  onclick="onLikert(this)"
+                  type="button">${o.label.replace('\n','<br>')}</button>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+buildLikert(APT_FIELDS, 'aptSliders');
+buildLikert(INT_FIELDS, 'intSliders');
+
+function onLikert(btn) {
+  const group = btn.closest('.likert');
+  group.querySelectorAll('.lk-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateCharts();
+}
+
+/* ── Radar charts ─────────────────────────────────────────────────── */
+const RADAR_OPT = (labels) => ({
+  type: 'radar',
+  data: {
+    labels,
+    datasets: [{
+      data: labels.map(() => 50),
+      backgroundColor: 'rgba(170,255,0,0.08)',
+      borderColor: '#aaff00',
+      borderWidth: 1.5,
+      pointBackgroundColor: '#aaff00',
+      pointRadius: 2.5,
+    }]
+  },
+  options: {
+    animation: { duration: 150 },
+    responsive: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      r: {
+        min: 0, max: 100,
+        ticks: { display: false },
+        grid: { color: '#1e1e1e' },
+        angleLines: { color: '#1e1e1e' },
+        pointLabels: { color: '#444', font: { size: 8 } }
+      }
+    }
+  }
+});
+
+const aptChart = new Chart(document.getElementById('aptitudeChart'),
+  RADAR_OPT(['Logic','Nums','Verbal','Creat','Analyt','Lead','Spatial','Mem','Empath']));
+
+const intChart = new Chart(document.getElementById('interestChart'),
+  RADAR_OPT(['Phy','Chem','Bio','Math','Lit','Eco','Arts','CS','Hist','Psych','Biz']));
+
+function getVals(fields) {
+  return fields.map(f => {
+    const active = document.querySelector(`.likert[data-name="${f.name}"] .lk-btn.active`);
+    return active ? parseInt(active.dataset.val) : 50;
+  });
+}
+
+function updateCharts() {
+  aptChart.data.datasets[0].data = getVals(APT_FIELDS);
+  aptChart.update('none');
+  intChart.data.datasets[0].data = getVals(INT_FIELDS);
+  intChart.update('none');
+}
+
+/* ── Screen navigation ────────────────────────────────────────────── */
+let currentScreen = 0;
+const screens = document.querySelectorAll('.screen');
+
+function goTo(n) {
+  screens.forEach((s, i) => {
+    s.classList.remove('active', 'behind');
+    if (i < n) s.classList.add('behind');
+    else if (i === n) s.classList.add('active');
+  });
+  currentScreen = n;
+}
+
+/* ── Analyse ──────────────────────────────────────────────────────── */
+async function analyse() {
+  const btn = document.getElementById('analyseBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Analysing...';
+
+  const payload = {};
+  [...APT_FIELDS, ...INT_FIELDS].forEach(f => {
+    const active = document.querySelector(`.likert[data-name="${f.name}"] .lk-btn.active`);
+    payload[f.name] = active ? parseFloat(active.dataset.val) : 50;
+  });
+
+  try {
+    const res = await fetch('/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error((await res.json()).detail || 'Server error');
+    const { recommendations: recs } = await res.json();
+
+    const container = document.getElementById('careerCards');
+    container.innerHTML = recs.map((r, i) => {
+      return `
+      <div class="career-card" id="cc${i}">
+        <div class="card-main">
+          <div class="card-rank">0${i+1}</div>
+          <div>
+            <div class="card-name">${r.career}</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:0%" data-target="${r.confidence}"></div>
+            </div>
+          </div>
+          <div class="card-right">
+            <div class="card-pct">${r.confidence}%</div>
+            <button class="details-btn" onclick="openDrawer('${r.career}')">Explore ↗</button>
+            <button class="contact-btn" onclick="openModal('${r.career}')">Talk to Expert</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    goTo(3);
+
+    recs.forEach((_, i) => {
+      setTimeout(() => {
+        const card = document.getElementById('cc' + i);
+        if (!card) return;
+        card.classList.add('show');
+        const bar = card.querySelector('.bar-fill');
+        if (bar) requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.width = bar.dataset.target + '%'; }));
+      }, i * 200);
+    });
+
+    setTimeout(() => {
+      confetti({ particleCount: 100, spread: 65, origin: { y: 0.55 }, colors: ['#aaff00','#ffffff','#ffaa00'] });
+    }, 400);
+
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Analyse My Profile <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  }
+}
+
+/* ── Retake ───────────────────────────────────────────────────────── */
+function retake() {
+  goTo(0);
+  document.querySelectorAll('.likert').forEach(group => {
+    group.querySelectorAll('.lk-btn').forEach(b => b.classList.remove('active'));
+    const neutral = group.querySelector('.lk-btn[data-val="50"]');
+    if (neutral) neutral.classList.add('active');
+  });
+  updateCharts();
+}
+
+/* ── Modal ────────────────────────────────────────────────────────── */
+function openModal(career) {
+  const e = EXPERTS[career] || { name: 'Expert Counsellor', spec: career, phone: 'N/A', email: 'N/A' };
+  const initials = e.name.split(' ').filter(w => w.match(/^[A-Z]/)).slice(-2).map(w=>w[0]).join('');
+  document.getElementById('mAvatar').textContent = initials;
+  document.getElementById('mName').textContent = e.name;
+  document.getElementById('mTag').textContent = career + ' Counsellor';
+  document.getElementById('mSpec').textContent = e.spec;
+  const ph = document.getElementById('mPhone'); ph.textContent = e.phone;
+  const pc = document.getElementById('mPhoneCard'); pc.href = 'tel:' + e.phone.replace(/\s/g,'');
+  const em = document.getElementById('mEmail'); em.textContent = e.email;
+  const ec = document.getElementById('mEmailCard'); ec.href = 'mailto:' + e.email;
+  document.getElementById('expertModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('expertModal').classList.remove('open'); }
+document.getElementById('expertModal').addEventListener('click', e => { if (e.target.id === 'expertModal') closeModal(); });
+
+/* ── Keyboard: ESC closes modal ──────────────────────────────────── */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
