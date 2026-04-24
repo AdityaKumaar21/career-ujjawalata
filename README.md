@@ -1,98 +1,159 @@
-# Career Guidance System — ML Backend
+# Career Ujjawalata
 
-A machine learning system that recommends top 3 career paths for Class 10 & 12 students based on their aptitude and interests.
+> AI-powered career guidance for Indian students (Class 10 & 12)
 
-## Career Paths Covered
-- Engineering
-- Medicine
-- Commerce / CA
-- Arts & Humanities
-- Law
-- Design & Architecture
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-RandomForest-orange?logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
+[![Accuracy](https://img.shields.io/badge/Model%20Accuracy-99.58%25-brightgreen)](#model)
+
+A full-stack web application that recommends top 3 career paths based on a student's aptitude profile and subject interests — built with a Random Forest classifier, FastAPI backend, and an interactive single-page frontend.
+
+---
+
+## Screenshots
+
+| Hero Screen | Assessment |
+| ----------- | ---------- |
+| ![Hero](screenshots/home_screen.png) | ![Assessment](screenshots/parameter1.png) |
+
+| Results | Career Details |
+| ------- | -------------- |
+| ![Results](screenshots/top3result.png) | ![Details](screenshots/detailsNexpert.png) |
+
+---
+
+## Features
+
+- **20-parameter assessment** — 9 aptitude traits + 11 subject interest scores
+- **Likert scale UI** — 5-option response scale (Strongly Disagree → Strongly Agree)
+- **Live radar charts** — aptitude and interest profiles update in real time as you answer
+- **Top 3 career recommendations** with confidence scores
+- **Career detail drawer** — exams, top colleges, salary ROI, roles, study duration, competition level
+- **Expert connect modal** — contact a domain expert for each career path
+- **Confetti reveal** on results screen
+
+---
+
+## Career Paths
+
+| Career | Key Signals |
+| ------ | ----------- |
+| Engineering | High logic, maths, physics, computers |
+| Medicine | High biology, chemistry, memory, empathy |
+| Commerce / CA | High economics, business, numerical ability |
+| Arts & Humanities | High verbal, creativity, literature, arts |
+| Law | High verbal, logical reasoning, memory, history |
+| Design & Architecture | High creativity, spatial ability, arts |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+| ----- | ---------- |
+| ML Model | scikit-learn `RandomForestClassifier` (200 trees, depth 12) |
+| Data | Synthetic — Likert-sampled from archetype distributions |
+| Backend | FastAPI + Pydantic v2 |
+| Server | Uvicorn (ASGI) |
+| Frontend | Vanilla JS, Chart.js (radar), canvas-confetti |
+| Styling | CSS custom properties, dark theme |
+
+---
 
 ## Project Structure
 
 ```
 career_guidance/
-├── generate_data.py     # Generates synthetic student dataset
-├── train_model.py       # Trains Random Forest model
-├── predict.py           # Predict top 3 careers for a student
-├── student_data.csv     # Generated after running generate_data.py
-├── career_model.pkl     # Saved model (after training)
-├── label_encoder.pkl    # Saved label encoder (after training)
+├── generate_data.py     # Synthetic dataset generator (Likert-sampled archetypes)
+├── train_model.py       # Trains and saves Random Forest model
+├── predict.py           # predict_top3() — importable inference function
+├── app.py               # FastAPI app — serves UI + /predict endpoint
+├── static/
+│   └── index.html       # Full single-page wizard frontend
+├── requirements.txt
 └── README.md
 ```
 
-## Features Used in Assessment
+---
 
-| Feature              | Description                        |
-|----------------------|------------------------------------|
-| logical_reasoning    | Aptitude for logic problems        |
-| numerical_ability    | Maths and number skills            |
-| verbal_ability       | Language and communication skills  |
-| creativity           | Creative thinking ability          |
-| analytical_thinking  | Problem analysis skills            |
-| leadership           | Leadership and teamwork traits     |
-| interest_physics     | Interest score in Physics          |
-| interest_chemistry   | Interest score in Chemistry        |
-| interest_biology     | Interest score in Biology          |
-| interest_maths       | Interest score in Maths            |
-| interest_literature  | Interest score in Literature       |
-| interest_economics   | Interest score in Economics        |
-| interest_arts        | Interest score in Arts             |
+## Assessment Parameters
 
-All scores are out of 100.
+### Aptitude (9 traits)
 
-## How to Run
+| Parameter | Description |
+| --------- | ----------- |
+| `logical_reasoning` | Deductive and inductive logic |
+| `numerical_ability` | Arithmetic and quantitative aptitude |
+| `verbal_ability` | Language comprehension and expression |
+| `creativity` | Original thinking and ideation |
+| `analytical_thinking` | Problem decomposition and analysis |
+| `leadership` | Initiative, teamwork, and decision-making |
+| `spatial_ability` | Visualising 2D/3D structures and relationships |
+| `memory_retention` | Recall of facts, sequences, and concepts |
+| `empathy` | Understanding and responding to others' needs |
 
-### Step 1 — Install dependencies
-```bash
-pip install scikit-learn pandas numpy
-```
+### Subject Interests (11 subjects)
 
-### Step 2 — Generate synthetic data
-```bash
-python generate_data.py
-```
+`Physics` · `Chemistry` · `Biology` · `Mathematics` · `Literature` · `Economics` · `Arts` · `Computers` · `History` · `Psychology` · `Business`
 
-### Step 3 — Train the model
-```bash
-python train_model.py
-```
+All parameters scored 0–100 (frontend maps Likert responses to 10 / 30 / 50 / 70 / 90).
 
-### Step 4 — Predict career for a student
-```bash
-python predict.py
-```
+## API Reference
 
-## Usage in Your Web App
+### `POST /predict`
 
-Import `predict_top3()` from `predict.py` and pass a dictionary of student scores:
+Accepts 20 numeric scores (0–100), returns top 3 career recommendations.
 
-```python
-from predict import predict_top3
+#### Request body
 
-student = {
-    "logical_reasoning": 85,
-    "numerical_ability": 80,
-    "verbal_ability": 60,
-    "creativity": 55,
-    "analytical_thinking": 82,
-    "leadership": 65,
-    "interest_physics": 88,
-    "interest_chemistry": 72,
-    "interest_biology": 40,
-    "interest_maths": 90,
-    "interest_literature": 38,
-    "interest_economics": 50,
-    "interest_arts": 32,
+```json
+{
+  "logical_reasoning": 90,
+  "numerical_ability": 88,
+  "verbal_ability": 52,
+  "creativity": 58,
+  "analytical_thinking": 87,
+  "leadership": 62,
+  "spatial_ability": 84,
+  "memory_retention": 70,
+  "empathy": 48,
+  "interest_physics": 91,
+  "interest_chemistry": 74,
+  "interest_biology": 38,
+  "interest_maths": 93,
+  "interest_literature": 35,
+  "interest_economics": 50,
+  "interest_arts": 30,
+  "interest_computers": 91,
+  "interest_history": 33,
+  "interest_psychology": 38,
+  "interest_business": 52
 }
-
-top3 = predict_top3(student)
-# Returns: [("Engineering", 0.87), ("Medicine", 0.07), ("Commerce_CA", 0.04)]
 ```
 
-## Next Steps
-- Integrate this backend with a Flask/FastAPI web server
-- Build the frontend assessment form
-- Replace synthetic data with real student data over time
+#### Response
+
+```json
+{
+  "recommendations": [
+    { "career": "Engineering",    "confidence": 94.5 },
+    { "career": "Design Architecture", "confidence": 3.2 },
+    { "career": "Commerce CA",    "confidence": 1.4 }
+  ]
+}
+```
+
+---
+
+## Model
+
+- **Algorithm:** `RandomForestClassifier` — 200 estimators, max depth 12
+- **Training data:** 1200 samples (200 per class), Likert-sampled from archetype (mean, std) distributions
+- **Features:** 20 (9 aptitude + 11 interest)
+- **Classes:** 6 career paths
+- **Train/test split:** 80/20, stratified
+- **Accuracy:** 99.58%
+
+---
+
